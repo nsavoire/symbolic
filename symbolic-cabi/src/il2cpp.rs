@@ -7,14 +7,14 @@ use symbolic::{common::ByteView, il2cpp::LineMapping};
 use crate::core::SymbolicStr;
 use crate::utils::ForeignObject;
 
-pub struct SymbolicLineMapping;
+pub struct SymbolicIL2CPPLineMapping;
 
-impl ForeignObject for SymbolicLineMapping {
+impl ForeignObject for SymbolicIL2CPPLineMapping {
     type RustObject = LineMapping;
 }
 
 #[repr(C)]
-pub struct SymbolicLineMappingResult {
+pub struct SymbolicIL2CPPLineMappingResult {
     pub file: SymbolicStr,
     pub line: u32,
 }
@@ -24,31 +24,31 @@ ffi_fn! {
     unsafe fn symbolic_il2cpp_line_mapping_from_bytes(
         bytes: *const u8,
         len: usize,
-    ) -> Result<*mut SymbolicLineMapping> {
+    ) -> Result<*mut SymbolicIL2CPPLineMapping> {
         let byteview = ByteView::from_slice(slice::from_raw_parts(bytes, len));
         let mapping_file = LineMapping::parse(&byteview).ok_or_else(|| anyhow::Error::msg("Invalid IL2CPP line mapping file"))?;
-        Ok(SymbolicLineMapping::from_rust(mapping_file))
+        Ok(SymbolicIL2CPPLineMapping::from_rust(mapping_file))
     }
 }
 
 ffi_fn! {
-    unsafe fn symbolic_il2cpp_line_mapping_free(mapping: *mut SymbolicLineMapping) {
-        SymbolicLineMapping::drop(mapping)
+    unsafe fn symbolic_il2cpp_line_mapping_free(mapping: *mut SymbolicIL2CPPLineMapping) {
+        SymbolicIL2CPPLineMapping::drop(mapping)
     }
 }
 
 ffi_fn! {
     /// Looks up a source location.
     unsafe fn symbolic_il2cpp_line_mapping_lookup(
-        line_mapping_ptr: *const SymbolicLineMapping,
+        line_mapping_ptr: *const SymbolicIL2CPPLineMapping,
         file: *const c_char,
         line: u32,
-    ) -> Result<SymbolicLineMappingResult> {
-        let line_mapping = SymbolicLineMapping::as_rust(line_mapping_ptr);
+    ) -> Result<SymbolicIL2CPPLineMappingResult> {
+        let line_mapping = SymbolicIL2CPPLineMapping::as_rust(line_mapping_ptr);
 
         let result = line_mapping.lookup(CStr::from_ptr(file).to_str()?, line).ok_or_else(|| anyhow::Error::msg("Could not map source location."))?;
 
-        Ok(SymbolicLineMappingResult {
+        Ok(SymbolicIL2CPPLineMappingResult {
             file: SymbolicStr::from_string(result.0.to_string()),
             line: result.1,
         })
@@ -56,7 +56,7 @@ ffi_fn! {
 }
 
 ffi_fn! {
-    unsafe fn symbolic_il2cpp_line_mapping_result_free(result: *mut SymbolicLineMappingResult) {
+    unsafe fn symbolic_il2cpp_line_mapping_result_free(result: *mut SymbolicIL2CPPLineMappingResult) {
         if !result.is_null() {
             let result = &*result;
             drop(result)
