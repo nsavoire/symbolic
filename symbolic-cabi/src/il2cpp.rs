@@ -58,8 +58,9 @@ ffi_fn! {
 ffi_fn! {
     unsafe fn symbolic_il2cpp_line_mapping_result_free(result: *mut SymbolicIL2CPPLineMappingResult) {
         if !result.is_null() {
-            let result = &*result;
-            drop(result)
+            let result = &mut *result;
+            let file_ptr: *mut SymbolicStr = &mut result.file;
+            drop(Box::from_raw(file_ptr));
         }
     }
 }
