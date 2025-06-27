@@ -904,16 +904,6 @@ impl<'data, 'object> Iterator for ElfSymbolIterator<'data, 'object> {
                     continue;
                 }
 
-                let section = match symbol.st_shndx {
-                    self::SHN_UNDEF => None,
-                    index => sections.get(index),
-                };
-
-                // We are only interested in symbols pointing into sections with executable flag.
-                if !section.map_or(false, |header| header.is_executable()) {
-                    continue;
-                }
-
                 let name = strtab.get_at(symbol.st_name).map(Cow::Borrowed);
 
                 return Some(Symbol {
