@@ -23,7 +23,9 @@ exclude = ["tests/**/*"]
 all-features = true
 
 [features]
-default = ["cpp", "msvc", "rust", "swift"]
+# Remove swift from default features, it causes build errors with bzl
+# default = ["cpp", "msvc", "rust", "swift"]
+default = ["cpp", "msvc", "rust"]
 cpp = ["cpp_demangle"]
 msvc = ["msvc-demangler"]
 rust = ["rustc-demangle"]
